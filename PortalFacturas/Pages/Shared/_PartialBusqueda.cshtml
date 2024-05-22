@@ -1,0 +1,313 @@
+﻿@using System.Globalization
+@if (Model.Instructions.Count > 0)
+{
+    @model BuscadorModel
+
+<hr>
+	<div class="row justify-content-md-center">
+		<div class="col-md-auto" id="grid">
+			<form method="post">
+				<div class="input-group">
+					<input type="text" class="form-control col-sm-4" asp-for="Folio" required autofocus>
+						<div class="input-group-append">
+							<button class="btn btn-primary mr-4" type="submit" asp-page-handler="BuscarFolio">Folio</button>
+							<a asp-page="./Buscador?currentpage=1" class="btn btn-primary" asp-page-handler="Pagina">Volver</a>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+
+        string path = string.Empty;   
+    
+		<div class="container-fluid table-responsive py-5" style="padding-right: 0px;padding-left: 0px;">
+			<table class="table table-sm">
+				<thead>
+					<tr>
+						<th></th>
+						<th scope="col" class="text-center">
+                        Fecha Emisión
+                    </th>
+						<th class="text-center">
+                        Folio
+                    </th>
+						<th class="d-none d-xl-block">
+                        Concepto
+                    </th>
+						<th style="text-align: right;">
+                        Neto
+                    </th>
+						<th class="d-none d-xl-block" style="text-align: right;">
+                        Iva
+                    </th>
+						<th style="text-align: right;">
+                        Total
+                    </th>
+						<th class="text-center"></th>
+						<th class="text-center"></th>
+						<th class="text-center"></th>
+					</tr>
+				</thead>
+				<tbody>
+                @foreach (var item in Model.Instructions)
+                {
+                    var existelink = false;
+                    @if (item.DteAsociados != null && item.DteAsociados.Any())
+                    {
+                        existelink = true;                      
+                    }
+                    
+					<tr>
+						<td>
+                            @if (item.DteAsociados != null && item.DteAsociados.Count() > 1)
+                            {
+                                
+							<img src="~/img/plus.png" />
+                                <div style="display:none">
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <th scope="col" class="text-center">
+                                                Fecha Emisión
+                                            </th>
+                                            <th class="text-center">
+                                                Folio
+                                            </th>
+                                            <th class="d-none d-xl-block">
+                                                Concepto
+                                            </th>
+                                            <th style="text-align: right;">
+                                                Neto
+                                            </th>
+                                            <th class="d-none d-xl-block" style="text-align: right;">
+                                                Iva
+                                            </th>
+                                            <th style="text-align: right;">
+                                                Total
+                                            </th>
+                                            <th class="text-center"></th>
+                                            <th class="text-center"></th>
+                                            <th class="text-center"></th>
+                                        </tr>
+                                        @{
+                                            int inicio = 0;
+                                            if (item.DteAsociados.Sum(c => c.NetAmount) > 0)
+                                            {
+                                                inicio = 1;
+                                            }                                                                         
+
+                                    }
+                                        @for (int y = inicio; y < item.DteAsociados.Count(); y++)
+                                        {
+                                            
+									<tr style="font-style: italic;">
+										<td class="text-center">
+                                                    @{
+                                                        if (existelink)
+                                                        {
+                                                            var emi = item.DteAsociados.ElementAt(y).EmissionDt;
+                                                            if (DateTime.Parse(emi) != new DateTime(0001, 01, 01))
+                                                            {
+                                                                @String.Format("{0:dd-MM-yyyy}", emi)
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            
+											<h6 class="font-weight-bold" style="color: #1b6ec2!important;">No facturado</h6>
+                                                        }
+                                                    }
+                                                
+										</td>
+										<td class="text-center">
+                                                    @{
+                                                        if (existelink)
+                                                        {
+                                                            @Html.DisplayFor(modelItem => item.DteAsociados.ElementAt(y).Folio)
+                                                        }
+                                                        else
+                                                        {
+                                                            
+											<h7 class="text-center text-info">-</h7>
+                                                        }
+                                                    }
+                                                
+										</td>
+                                                @{
+
+                                                    path = item.DteAsociados.ElementAt(y).Id.ToString();
+                                                }
+                                                
+										<td class="d-none d-xl-block">
+                                                    @Html.DisplayFor(modelItem => item.AuxiliaryData.PaymentMatrixConcept)
+                                                </td>
+										<td style="text-align: right;">
+                                                    @{
+                                                        var monto2 = item.DteAsociados.ElementAt(y).NetAmount;
+                                                        @String.Format(CultureInfo.GetCultureInfo("es-CL"), "{0:C}", monto2) }
+                                                </td>
+										<td class="d-none d-xl-block" style="text-align: right;">
+                                                    @{ @String.Format(CultureInfo.GetCultureInfo("es-CL"), "{0:C}", monto2 * 0.19) }
+                                                </td>
+										<td style="text-align: right;">
+                                                    @{ @String.Format(CultureInfo.GetCultureInfo("es-CL"), "{0:C}", monto2 * 1.19) }
+                                                </td>
+										<td class="text-center">
+                                                    @{
+                                                        if (existelink)
+                                                        {
+                                                            
+											<a class="bi bi-search" asp-page="./Invoice" target="_blank" asp-route-render="@path" asp-page-handler="HtmlDoc"></a>
+                                                        }
+                                                    }
+                                                
+										</td>
+										<td class="text-center">
+                                                    @{
+                                                        if (existelink)
+                                                        {
+                                                            
+											<a class="bi bi-file-code" asp-page="./Invoice" target="_blank" asp-route-render="@path" asp-page-handler="XmlDoc"></a>
+                                                        }
+                                                    }
+                                                
+										</td>
+										<td class="text-center">
+                                                    @{
+                                                        if (existelink)
+                                                        {
+                                                            
+											<a class="bi bi-file-pdf" asp-page="./Invoice" target="_blank" asp-route-render="@path" asp-page-handler="PdfDoc"></a>
+                                                        }
+                                                    }
+                                                
+										</td>
+									</tr>
+                                        }
+
+                                    
+								</table>
+							</div>
+                            }
+                        
+						</td>
+						<td class="text-center">
+                            @{
+                                if (existelink && item.DteAsociados.Sum(c=>c.NetAmount) > 0)
+                                {
+                                    var emi = item.DteAsociados.ElementAt(0).EmissionDt;
+                                    if (DateTime.Parse(emi) != new DateTime(0001, 01, 01))
+                                    {
+                                        @String.Format("{0:dd-MM-yyyy}", emi)
+                                    }
+                                }
+                                else
+                                {
+                                    
+							<h6 class="font-weight-bold" style="color: #1b6ec2!important;">No facturado</h6>
+                                }
+                            }
+                        
+						</td>
+						<td class="text-center">
+                            @{
+                                 if (existelink && item.DteAsociados.Sum(c=>c.NetAmount) > 0)
+                                {
+                                    @Html.DisplayFor(modelItem => item.DteAsociados.ElementAt(0).Folio)
+                                }
+                                else
+                                {
+                                    
+							<h7 class="text-center text-info">-</h7>
+                                }
+                            }
+                        
+						</td>
+						<td class="d-none d-xl-block">
+                            @Html.DisplayFor(modelItem => item.AuxiliaryData.PaymentMatrixConcept)
+                        </td>
+						<td style="text-align: right;">
+                            @{
+                                var monto = item.Amount;
+                                @String.Format(System.Globalization.CultureInfo.GetCultureInfo("es-CL"), "{0:C}", monto) }
+                        </td>
+						<td class="d-none d-xl-block" style="text-align: right;">
+                            @{ @String.Format(System.Globalization.CultureInfo.GetCultureInfo("es-CL"), "{0:C}", monto * 0.19) }
+                        </td>
+						<td style="text-align: right;">
+                            @{ @String.Format(System.Globalization.CultureInfo.GetCultureInfo("es-CL"), "{0:C}", monto * 1.19) }
+                        </td>
+                        @{
+                            if (existelink && item.DteAsociados.Sum(c => c.NetAmount) > 0)
+                            {
+                                path = item.DteAsociados.ElementAt(0).Id.ToString();
+                            }
+                        }
+                        
+						<td class="text-center">
+                            @{
+                                 if (existelink && item.DteAsociados.Sum(c=>c.NetAmount) > 0)
+                                {
+                                    
+							<a class="bi bi-search" asp-page="./Invoice" target="_blank" asp-route-render="@path" asp-page-handler="HtmlDoc"></a>
+                                }
+                            }
+                        
+						</td>
+						<td class="text-center">
+                            @{
+                                if (existelink && item.DteAsociados.Sum(c => c.NetAmount) > 0)
+                                {
+                                    
+							<a class="bi bi-file-code" asp-page="./Invoice" target="_blank" asp-route-render="@path" asp-page-handler="XmlDoc"></a>
+                                }
+                            }
+                        
+						</td>
+						<td class="text-center">
+                            @{
+                                if (existelink && item.DteAsociados.Sum(c => c.NetAmount) > 0)
+                                {
+                                    
+							<a class="bi bi-file-pdf" asp-page="./Invoice" target="_blank" asp-route-render="@path" asp-page-handler="PdfDoc"></a>
+                                }
+                            }
+                        
+						</td>
+					</tr>
+                     
+                }
+            
+				</tbody>
+			</table>
+			<div>
+				<ul class="pagination">
+                @for (var z = 1; z <= Model.TotalPages; z++)
+                {
+                    
+					<li class="page-item @(z == Model.CurrentPage ? "active" : "")">
+						<a asp-route-currentpage="@z" class="page-link" asp-page-handler="Pagina">@z</a>
+					</li>
+                }
+            
+				</ul>
+			</div>
+		</div>
+}
+else
+{
+   
+    
+		<h6>@Model.Mensaje</h6>
+}
+
+@section Scripts {
+
+
+		<partial name="_ValidationScriptsPartial" />
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+			<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+
+
+}
+

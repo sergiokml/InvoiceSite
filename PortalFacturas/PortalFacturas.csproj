@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <CopyRefAssembliesToPublishDirectory>false</CopyRefAssembliesToPublishDirectory>
+    <UserSecretsId>5e0a2cf9-8b8a-44be-98b1-785771f81f61</UserSecretsId>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Centralizador-Atlas\Cve.Atlas.CenLib\Cve.CenLib.csproj" />
+    <ProjectReference Include="..\..\Centralizador-Atlas\Cve.Atlas.GraphLib\Cve.GraphLib.csproj" />
+    <ProjectReference Include="..\..\LibreDteDotNet.Common\LibreDteDotNet.Common.csproj" />
+  </ItemGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
